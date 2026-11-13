@@ -12,6 +12,10 @@ router.post('/:chatId/message/send', (req, res) => chatController.sendMessage(re
 // 3. Get Messages
 router.get('/:chatId/messages', (req, res) => chatController.getMessages(req, res));
 
+// Bonus: Edit Message
+router.patch('/:chatId/message/:messageId', (req, res) => chatController.editMessage(req, res));
+router.put('/:chatId/message/:messageId', (req, res) => chatController.editMessage(req, res));
+
 // 4. Mark Message Read
 router.post('/:chatId/message/:messageId/read', (req, res) => chatController.markMessageRead(req, res));
 

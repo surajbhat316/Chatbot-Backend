@@ -32,6 +32,7 @@ export class FirestoreService {
       text,
       timestamp: serverTimestamp,
       readBy: [senderId],
+      isEdited: false,
     };
 
     await newMessageRef.set(messageData);
@@ -43,6 +44,7 @@ export class FirestoreService {
       text,
       timestamp: new Date().toISOString(),
       readBy: [senderId],
+      isEdited: false,
     };
   }
 
@@ -68,8 +70,59 @@ export class FirestoreService {
         text: data.text,
         timestamp: this.formatTimestamp(data.timestamp),
         readBy: Array.isArray(data.readBy) ? data.readBy : [],
+        isEdited: !!data.isEdited,
+        editedAt: this.formatTimestamp(data.editedAt),
       };
     });
+  }
+
+  /**
+   * Bonus: Edit Message
+   * Updates text, sets isEdited = true and editedAt = serverTimestamp
+   * Only allows the original author (senderId === userId) to edit.
+   */
+  async editMessage(
+    chatId: string,
+    messageId: string,
+    userId: string,
+    newText: string
+  ): Promise<ChatMessage> {
+    const firestore = getFirestore();
+    const messageDocRef = firestore
+      .collection('chats')
+      .doc(chatId)
+      .collection('messages')
+      .doc(messageId);
+
+    const docSnapshot = await messageDocRef.get();
+    if (!docSnapshot.exists) {
+      throw new Error(`Message with ID "${messageId}" was not found in chat "${chatId}".`);
+    }
+
+    const data = docSnapshot.data() || {};
+    if (data.senderId !== userId) {
+      const error: any = new Error('Unauthorized: You can only edit your own messages.');
+      error.status = 403;
+      throw error;
+    }
+
+    const now = new Date();
+    await messageDocRef.update({
+      text: newText,
+      isEdited: true,
+      editedAt: FieldValue.serverTimestamp(),
+    });
+
+    return {
+      id: messageId,
+      chatId,
+      senderId: data.senderId,
+      text: newText,
+      timestamp: this.formatTimestamp(data.timestamp),
+      readBy: Array.isArray(data.readBy) ? data.readBy : [],
+      isEdited: true,
+      editedAt: now.toISOString(),
+    };
   }
 
   /**

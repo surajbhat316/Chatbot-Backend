@@ -8,6 +8,11 @@ export interface SendMessageDTO {
   text: string;
 }
 
+export interface EditMessageDTO {
+  userId: string;
+  text: string;
+}
+
 export interface MarkReadDTO {
   userId: string;
 }
@@ -24,6 +29,8 @@ export interface ChatMessage {
   text: string;
   timestamp: string | null;
   readBy: string[];
+  isEdited?: boolean;
+  editedAt?: string | null;
 }
 
 export interface LastSeenRecord {

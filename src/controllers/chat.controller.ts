@@ -105,6 +105,51 @@ export class ChatController {
   }
 
   /**
+   * Bonus: Edit Message
+   * PATCH /chat/:chatId/message/:messageId
+   * Body: { userId, text }
+   * Output: Updated message
+   */
+  async editMessage(req: Request, res: Response): Promise<void> {
+    try {
+      const chatId = getParam(req.params.chatId);
+      const messageId = getParam(req.params.messageId);
+      const { userId, text } = req.body;
+
+      if (!userId || typeof text !== 'string' || text.trim() === '') {
+        res.status(400).json({
+          error: 'userId and non-empty text are required.',
+        });
+        return;
+      }
+
+      // Verify that user is a member of the chat in MySQL
+      const isMember = await chatService.isMemberOfChat(chatId, String(userId));
+      if (!isMember) {
+        res.status(403).json({
+          error: `User "${userId}" is not a member of chat "${chatId}".`,
+        });
+        return;
+      }
+
+      const updatedMessage = await firestoreService.editMessage(
+        chatId,
+        messageId,
+        String(userId),
+        text.trim()
+      );
+
+      res.status(200).json(updatedMessage);
+    } catch (error: any) {
+      console.error('Error editing message:', error);
+      const statusCode = error.status || (error.message?.includes('not found') ? 404 : 500);
+      res.status(statusCode).json({
+        error: error.message || 'Internal server error while editing message.',
+      });
+    }
+  }
+
+  /**
    * 4. Mark Message Read
    * POST /chat/:chatId/message/:messageId/read
    * Body: { userId }

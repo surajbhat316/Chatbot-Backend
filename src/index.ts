@@ -26,6 +26,7 @@ app.get('/', (req: Request, res: Response) => {
       '4. Mark Message Read': 'POST /chat/:chatId/message/:messageId/read',
       '5. Update Last Seen': 'POST /chat/:chatId/lastseen',
       '6. List User Chats': 'GET /user/:userId/chats',
+      'Bonus. Edit Message': 'PATCH /chat/:chatId/message/:messageId',
       'Helper. Create User': 'POST /user/create',
     },
   });

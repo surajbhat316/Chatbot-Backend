@@ -160,7 +160,33 @@ npm start
 
 ---
 
-### 4. Mark Message as Read
+### 4. Edit Message (Bonus Feature)
+- **Route:** `PATCH /chat/:chatId/message/:messageId` (also supports `PUT`)
+- **Description:** Allows the original author to update their message. Validates chat membership in MySQL and verifies authorship (`senderId === userId`) before updating in Firestore.
+- **Request Body:**
+  ```json
+  {
+    "userId": "user_1",
+    "text": "Corrected message text"
+  }
+  ```
+- **Response (200):**
+  ```json
+  {
+    "id": "firestore_message_id_123",
+    "chatId": "e305e7b2-cb95-46aa-bd61-12c5b0583b28",
+    "senderId": "user_1",
+    "text": "Corrected message text",
+    "timestamp": "2026-11-13T15:30:00.000Z",
+    "readBy": ["user_1"],
+    "isEdited": true,
+    "editedAt": "2026-11-13T15:32:00.000Z"
+  }
+  ```
+
+---
+
+### 5. Mark Message as Read
 - **Route:** `POST /chat/:chatId/message/:messageId/read`
 - **Description:** Adds the user's ID to the message's `readBy` array in Firestore.
 - **Request Body:**
@@ -180,7 +206,7 @@ npm start
 
 ---
 
-### 5. Update Last Seen Message
+### 6. Update Last Seen Message
 - **Route:** `POST /chat/:chatId/lastseen`
 - **Description:** Updates the user's last seen message pointer in Firestore.
 - **Request Body:**
@@ -203,7 +229,7 @@ npm start
 
 ---
 
-### 6. List User Chats
+### 7. List User Chats
 - **Route:** `GET /user/:userId/chats`
 - **Description:** Fetches all chats a user belongs to from MySQL, including other participants' information.
 - **Response (200):**
@@ -233,7 +259,7 @@ npm start
 
 ---
 
-### 7. Helper: Create User (Optional)
+### 8. Helper: Create User (Optional)
 - **Route:** `POST /user/create`
 - **Description:** Convenient endpoint to seed users in MySQL for testing.
 - **Request Body:**
